@@ -5,7 +5,7 @@ export const BACKTEST_LAYERS = [
     key: "re24",
     label: "RE24 (runs)",
     description:
-      "Most of the game -- decisions valued in expected runs added.",
+      "Most of the game, valued in expected runs added.",
     attempts: 2039,
     goSuccessRate: 0.811,
     holdSuccessRate: 0.695,

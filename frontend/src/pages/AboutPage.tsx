@@ -1,32 +1,14 @@
 import { NavLink } from "react-router"
 import { Button } from "@/components/ui/button"
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion"
 
-const FAQ_ITEMS = [
-  {
-    value: "data",
-    question: "What data does it use?",
-    answer:
-      "Retrosheet play-by-play and Statcast skill tables from 2023-2025 -- runner sprint speed and age, pitcher hold/pickoff tendencies, catcher pop time and caught-stealing rate, plus the full game situation (inning, outs, count, base state, score).",
-  },
-  {
-    value: "break-even",
-    question: "What's a break-even rate?",
-    answer:
-      "The success rate a steal attempt needs to clear for it to be worth the risk, given what's on the line. Below break-even, the expected cost of getting caught outweighs the expected gain of being safe.",
-  },
-  {
-    value: "why-hold",
-    question: "Why isn't every high-probability steal a GO?",
-    answer:
-      "A high success rate isn't enough on its own -- it has to clear the break-even bar for that specific situation. Late and close games raise the bar sharply, since a caught stealing can end a trailing team's last real chance.",
-  },
-]
+function ExampleStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between border-b border-border py-2 last:border-b-0">
+      <div className="stat-label">{label}</div>
+      <div className="text-lg font-semibold stat-value">{value}</div>
+    </div>
+  )
+}
 
 export default function AboutPage() {
   return (
@@ -51,9 +33,9 @@ export default function AboutPage() {
             <span className="font-medium text-foreground">
               Success-probability model.
             </span>{" "}
-            An XGBoost model trained on runner, pitcher, catcher, and
-            situation features predicts the probability that a given steal
-            attempt succeeds.
+            A model trained on runner, pitcher, catcher, and situation
+            features predicts the probability that a given steal attempt
+            succeeds.
           </p>
           <p>
             <span className="font-medium text-foreground">
@@ -62,19 +44,33 @@ export default function AboutPage() {
             That probability is compared against a situational break-even
             rate derived from run expectancy (RE24) for most of the game.
             Late and close situations switch to a win-probability framework
-            instead, since RE24's run-based math badly understates the cost
-            of a caught stealing that ends a trailing team's last chance.
+            instead, since RE24's run-based math understates the cost of a
+            caught stealing that ends a trailing team's last chance.
+          </p>
+          <p>
+            <span className="font-medium text-foreground">
+              Why logistic regression, not XGBoost.
+            </span>{" "}
+            Both a logistic-regression baseline and an XGBoost model were
+            trained on the same features, tested on a chronological holdout
+            so no future data leaked into training. The two land within
+            noise of each other: logistic regression scores a 0.4857 log
+            loss and 0.6789 AUC, XGBoost scores 0.4838 and 0.6762, and
+            logistic regression actually edges XGBoost on AUC. Since the
+            simpler model wasn't worse, it's the one that ships. The
+            production API serves the logistic-regression model, with no
+            Python process involved at request time.
           </p>
         </div>
       </section>
 
-      <section className="rounded-2xl border border-border bg-secondary p-6">
+      <section className="border-t-2 border-border pt-6">
         <h2 className="mb-2 text-lg font-semibold text-foreground">
-          Validated against real outcomes
+          Backtested against held-out outcomes
         </h2>
         <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-          The model was backtested against 2,714 held-out real steal attempts
-          from the 2025 season -- not a hand-picked sample.
+          The model was tested against all 2,714 steal attempts held out
+          from the 2025 season, not a hand-picked sample.
         </p>
         <Button asChild variant="outline" size="sm">
           <NavLink to="/model-performance">See the full backtest</NavLink>
@@ -83,24 +79,26 @@ export default function AboutPage() {
 
       <section>
         <h2 className="mb-3 text-xl font-semibold text-foreground">
-          FAQ
+          Worked example
         </h2>
-        <Accordion className="flex flex-col" transition={{ type: "spring", stiffness: 220, damping: 26 }}>
-          {FAQ_ITEMS.map((item) => (
-            <AccordionItem
-              key={item.value}
-              value={item.value}
-              className="border-b border-border py-3"
-            >
-              <AccordionTrigger className="flex w-full items-center justify-between text-left text-sm font-medium text-foreground">
-                {item.question}
-              </AccordionTrigger>
-              <AccordionContent className="pt-2 text-sm text-muted-foreground">
-                {item.answer}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+          Fourth inning, top half, one out, runner on first, batting team up
+          by two. Bobby Witt (75.9% prior success, 30.2 ft/s sprint speed) is
+          on first, facing Cole Ragans (allowed steals at a 71.0% rate) with
+          J. T. Realmuto (1.86s pop time) catching. Witt breaks for second.
+        </p>
+        <div className="flex flex-col">
+          <ExampleStat label="Model's predicted success" value="70.4%" />
+          <ExampleStat label="Break-even needed" value="73.7%" />
+        </div>
+        <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+          70.4% doesn't clear the 73.7% bar this situation demands, so the
+          call is HOLD, priced off run expectancy (RE24) since the game is
+          neither late nor close. One of MLB's fastest runners still isn't
+          enough on its own: the break-even rate is what a specific
+          situation asks for, and a high success rate only matters relative
+          to that number.
+        </p>
       </section>
     </div>
   )

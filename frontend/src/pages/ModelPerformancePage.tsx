@@ -11,8 +11,8 @@ import {
 function PercentStat({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="flex items-baseline gap-0.5 text-2xl font-semibold text-foreground">
+      <div className="stat-label">{label}</div>
+      <div className="flex items-baseline gap-0.5 text-2xl font-semibold text-foreground stat-value">
         <SlidingNumber value={Number((value * 100).toFixed(1))} />
         <span>%</span>
       </div>
@@ -31,21 +31,19 @@ function PolicyStat({
 }) {
   return (
     <div
-      className={`rounded-xl border p-4 ${
-        accent === "navy"
-          ? "border-brand-navy/20 bg-brand-navy/5"
-          : "border-brand-red/20 bg-brand-red/5"
+      className={`rounded-none border border-border border-l-4 p-4 ${
+        accent === "navy" ? "border-l-brand-navy" : "border-l-brand-red"
       }`}
     >
-      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className="stat-label">{label}</div>
       <div
-        className={`text-2xl font-semibold ${
+        className={`text-2xl font-semibold stat-value ${
           accent === "navy" ? "text-brand-navy" : "text-brand-red"
         }`}
       >
         +<SlidingNumber value={value} decimalSeparator="." />
       </div>
-      <div className="text-xs text-muted-foreground">runs / attempt</div>
+      <div className="stat-label">runs / attempt</div>
     </div>
   )
 }
@@ -63,7 +61,7 @@ export default function ModelPerformancePage() {
         </p>
         <InView once>
           <div className="mt-6 inline-flex items-baseline gap-2">
-            <span className="text-4xl font-semibold text-foreground">
+            <span className="text-4xl font-semibold text-foreground stat-value">
               <AnimatedNumber value={BACKTEST_TOTAL_ATTEMPTS} />
             </span>
             <span className="text-sm text-muted-foreground">
@@ -77,7 +75,7 @@ export default function ModelPerformancePage() {
         {BACKTEST_LAYERS.map((layer) => (
           <section
             key={layer.key}
-            className="rounded-2xl border border-border bg-card p-8"
+            className="rounded-none border border-border p-8"
           >
             <div className="mb-6 flex flex-col gap-1">
               <h2 className="text-lg font-semibold text-foreground">
@@ -90,8 +88,8 @@ export default function ModelPerformancePage() {
 
             <div className="mb-6 grid grid-cols-3 gap-4">
               <div>
-                <div className="text-xs text-muted-foreground">Attempts</div>
-                <div className="text-2xl font-semibold text-foreground">
+                <div className="stat-label">Attempts</div>
+                <div className="text-2xl font-semibold text-foreground stat-value">
                   <AnimatedNumber value={layer.attempts} />
                 </div>
               </div>
@@ -118,23 +116,23 @@ export default function ModelPerformancePage() {
         ))}
       </AnimatedGroup>
 
-      <section className="rounded-2xl border border-border bg-secondary p-8">
+      <section className="border-t-2 border-border pt-8">
         <h2 className="mb-3 text-lg font-semibold text-foreground">
           Where the value came from
         </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          The model's calls added real value over the real historical policy
-          in both regimes, mainly by avoiding the lowest-probability
+          The model's calls added value over the historical policy in both
+          regimes, mainly by avoiding the lowest-probability
           attempts. Of the{" "}
-          <span className="font-medium text-foreground">
+          <span className="font-medium text-foreground stat-value">
             {BACKTEST_HOLD_STORY.totalHeld}
           </span>{" "}
           RE24 situations it would have held,{" "}
-          <span className="font-medium text-foreground">
+          <span className="font-medium text-foreground stat-value">
             {BACKTEST_HOLD_STORY.caughtIfAttempted}
           </span>{" "}
           were actually caught stealing versus{" "}
-          <span className="font-medium text-foreground">
+          <span className="font-medium text-foreground stat-value">
             {BACKTEST_HOLD_STORY.missedOpportunities}
           </span>{" "}
           missed opportunities.

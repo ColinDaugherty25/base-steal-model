@@ -90,8 +90,8 @@ export default function PredictorPage() {
       <header className="mb-6">
         <h1 className="text-2xl font-semibold text-foreground">Should they steal?</h1>
         <p className="text-sm text-muted-foreground">
-          Set the game situation and pick real players -- the model and decision layer trained on
-          2023-2025 MLB play-by-play do the rest.
+          Set the game situation and pick the players. A model and decision
+          layer trained on 2023-2025 MLB play-by-play handle the rest.
         </p>
       </header>
 
@@ -142,7 +142,7 @@ export default function PredictorPage() {
           {mutation.isSuccess ? (
             <ResultCard result={mutation.data} />
           ) : (
-            <div className="flex min-h-48 flex-col items-center justify-center rounded-2xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
+            <div className="flex min-h-48 flex-col items-center justify-center rounded-none border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               Fill in the situation and players, then get a recommendation.
             </div>
           )}
