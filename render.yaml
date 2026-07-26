@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: base-steal-backend
+    runtime: go
+    rootDir: backend
+    buildCommand: go build -o bin/server ./cmd/server
+    startCommand: ./bin/server
+    healthCheckPath: /api/health
+    envVars:
+      - key: CORS_ORIGIN
+        value: https://frontend-swart-ten-58.vercel.app
+    plan: free
