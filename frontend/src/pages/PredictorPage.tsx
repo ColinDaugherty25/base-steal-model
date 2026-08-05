@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query"
 import { useState } from "react"
 
-import { PlayerCombobox } from "@/components/PlayerCombobox"
-import { PlayerStatFields } from "@/components/PlayerStatFields"
+import { PlayerInput } from "@/components/PlayerInput"
 import { ResultCard } from "@/components/ResultCard"
 import { SituationForm } from "@/components/SituationForm"
 import { predictStealDecision } from "@/lib/api"
+import { clampSituation } from "@/lib/manual-entry-defaults"
 import type {
   CatcherStats,
   PitcherStats,
@@ -40,11 +40,41 @@ const DEFAULT_SITUATION: Situation = {
   catcher_pop_time: null,
 }
 
+type Mode = "search" | "manual"
+
+// Per-role slice of DEFAULT_SITUATION -- used to reset a role's stat
+// fields when switching that role from Search to Manual, so the manual
+// form doesn't start out silently pre-filled with whichever real
+// player's numbers happened to be selected before the switch.
+const RUNNER_MANUAL_DEFAULTS: Partial<Situation> = {
+  runner_bats_lhb: false,
+  runner_prior_sr: 0,
+  runner_prior_att: 0,
+  runner_sprint_speed: null,
+  runner_age: null,
+}
+const PITCHER_MANUAL_DEFAULTS: Partial<Situation> = {
+  pitcher_throws_lhp: false,
+  pitcher_prior_sr_allowed: 0,
+}
+const CATCHER_MANUAL_DEFAULTS: Partial<Situation> = {
+  catcher_prior_cs_rate: 0,
+  catcher_pop_time: null,
+}
+
 export default function PredictorPage() {
   const [situation, setSituation] = useState<Situation>(DEFAULT_SITUATION)
   const [runner, setRunner] = useState<PlayerSearchResult | null>(null)
   const [pitcher, setPitcher] = useState<PlayerSearchResult | null>(null)
   const [catcher, setCatcher] = useState<PlayerSearchResult | null>(null)
+
+  const [runnerMode, setRunnerMode] = useState<Mode>("search")
+  const [pitcherMode, setPitcherMode] = useState<Mode>("search")
+  const [catcherMode, setCatcherMode] = useState<Mode>("search")
+
+  const [runnerUseAverage, setRunnerUseAverage] = useState(false)
+  const [pitcherUseAverage, setPitcherUseAverage] = useState(false)
+  const [catcherUseAverage, setCatcherUseAverage] = useState(false)
 
   const mutation = useMutation({ mutationFn: predictStealDecision })
 
@@ -85,6 +115,37 @@ export default function PredictorPage() {
     }))
   }
 
+  function handleRunnerModeChange(mode: Mode) {
+    setRunnerMode(mode)
+    if (mode === "manual") {
+      setRunner(null)
+      setRunnerUseAverage(false)
+      setSituation((prev) => ({ ...prev, ...RUNNER_MANUAL_DEFAULTS }))
+    }
+  }
+
+  function handlePitcherModeChange(mode: Mode) {
+    setPitcherMode(mode)
+    if (mode === "manual") {
+      setPitcher(null)
+      setPitcherUseAverage(false)
+      setSituation((prev) => ({ ...prev, ...PITCHER_MANUAL_DEFAULTS }))
+    }
+  }
+
+  function handleCatcherModeChange(mode: Mode) {
+    setCatcherMode(mode)
+    if (mode === "manual") {
+      setCatcher(null)
+      setCatcherUseAverage(false)
+      setSituation((prev) => ({ ...prev, ...CATCHER_MANUAL_DEFAULTS }))
+    }
+  }
+
+  function handleSubmit() {
+    mutation.mutate(clampSituation(situation))
+  }
+
   return (
     <div className="mx-auto max-w-6xl p-6">
       <header className="mb-6">
@@ -113,23 +174,53 @@ export default function PredictorPage() {
             <CardContent className="flex flex-col gap-4">
               <div className="flex flex-col gap-1">
                 <Label>Runner</Label>
-                <PlayerCombobox role="runner" label="Runner" selected={runner} onSelect={handleRunnerSelect} />
-                <PlayerStatFields role="runner" player={runner} />
+                <PlayerInput
+                  role="runner"
+                  label="Runner"
+                  mode={runnerMode}
+                  onModeChange={handleRunnerModeChange}
+                  selected={runner}
+                  onSelect={handleRunnerSelect}
+                  situation={situation}
+                  onManualChange={handleSituationChange}
+                  useAverage={runnerUseAverage}
+                  onUseAverageChange={setRunnerUseAverage}
+                />
               </div>
               <div className="flex flex-col gap-1">
                 <Label>Pitcher</Label>
-                <PlayerCombobox role="pitcher" label="Pitcher" selected={pitcher} onSelect={handlePitcherSelect} />
-                <PlayerStatFields role="pitcher" player={pitcher} />
+                <PlayerInput
+                  role="pitcher"
+                  label="Pitcher"
+                  mode={pitcherMode}
+                  onModeChange={handlePitcherModeChange}
+                  selected={pitcher}
+                  onSelect={handlePitcherSelect}
+                  situation={situation}
+                  onManualChange={handleSituationChange}
+                  useAverage={pitcherUseAverage}
+                  onUseAverageChange={setPitcherUseAverage}
+                />
               </div>
               <div className="flex flex-col gap-1">
                 <Label>Catcher</Label>
-                <PlayerCombobox role="catcher" label="Catcher" selected={catcher} onSelect={handleCatcherSelect} />
-                <PlayerStatFields role="catcher" player={catcher} />
+                <PlayerInput
+                  role="catcher"
+                  label="Catcher"
+                  mode={catcherMode}
+                  onModeChange={handleCatcherModeChange}
+                  selected={catcher}
+                  onSelect={handleCatcherSelect}
+                  situation={situation}
+                  onManualChange={handleSituationChange}
+                  useAverage={catcherUseAverage}
+                  onUseAverageChange={setCatcherUseAverage}
+                />
               </div>
             </CardContent>
           </Card>
 
-          <Button size="lg" onClick={() => mutation.mutate(situation)} disabled={mutation.isPending}>
+          <Button size="lg" onClick={handleSubmit} disabled={mutation.isPending}>
             {mutation.isPending ? "Calculating..." : "Get recommendation"}
           </Button>
 

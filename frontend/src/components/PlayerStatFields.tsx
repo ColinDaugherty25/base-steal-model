@@ -11,9 +11,10 @@ interface PlayerStatFieldsProps {
   player: PlayerSearchResult | null
 }
 
-// Read-only summary of the selected player's auto-filled stats -- no
-// manual override inputs, per the product decision to search real players
-// rather than hand-enter stats.
+// Read-only summary of the selected player's auto-filled stats, shown in
+// search mode only. Manual mode (see ManualStatsForm.tsx) shows its own
+// editable inputs instead, so there's nothing for this component to
+// additionally summarize there.
 export function PlayerStatFields({ role, player }: PlayerStatFieldsProps) {
   if (!player) return null
 

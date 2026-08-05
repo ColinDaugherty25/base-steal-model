@@ -33,10 +33,12 @@ interface PlayerComboboxProps {
   onSelect: (player: PlayerSearchResult) => void
 }
 
-// Reused 3x (runner/pitcher/catcher) -- a shadcn Command+Popover combobox
-// backed by /api/players/search. Selecting a player auto-fills their real
-// stats into the parent form (see App.tsx); no manual override UI, per the
-// product decision to search real players rather than hand-enter stats.
+// Reused 3x (runner/pitcher/catcher) via PlayerInput -- a shadcn
+// Command+Popover combobox backed by /api/players/search. Selecting a
+// player auto-fills their real stats into the parent form
+// (see PredictorPage.tsx). This covers the search half only; PlayerInput
+// also offers a manual-entry alternative (see ManualStatsForm.tsx) for
+// players who aren't in the database.
 export function PlayerCombobox({ role, label, selected, onSelect }: PlayerComboboxProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
