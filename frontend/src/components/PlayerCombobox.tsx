@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { searchPlayers } from "@/lib/api"
 import type { PlayerRole, PlayerSearchResult } from "@/lib/types"
 import { cn } from "@/lib/utils"
+import { useSlowRequestHint } from "@/hooks/useSlowRequestHint"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -50,6 +51,7 @@ export function PlayerCombobox({ role, label, selected, onSelect }: PlayerCombob
     queryFn: () => searchPlayers(role, debouncedQuery),
     enabled: searchReady,
   })
+  const isSlow = useSlowRequestHint(isFetching)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -73,8 +75,14 @@ export function PlayerCombobox({ role, label, selected, onSelect }: PlayerCombob
           />
           <CommandList>
             {isFetching && (
-              <div className="flex items-center justify-center py-4">
+              <div className="flex flex-col items-center justify-center gap-2 py-4">
                 <Loader2 className="size-4 animate-spin opacity-50" />
+                {isSlow && (
+                  <p className="px-4 text-center text-xs text-muted-foreground">
+                    Waking up the server. This can take up to 30 seconds
+                    the first time.
+                  </p>
+                )}
               </div>
             )}
             {!isFetching && searchReady && (

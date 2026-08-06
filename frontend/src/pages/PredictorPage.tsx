@@ -6,6 +6,7 @@ import { ResultCard } from "@/components/ResultCard"
 import { SituationForm } from "@/components/SituationForm"
 import { predictStealDecision } from "@/lib/api"
 import { clampSituation } from "@/lib/manual-entry-defaults"
+import { useSlowRequestHint } from "@/hooks/useSlowRequestHint"
 import type {
   CatcherStats,
   PitcherStats,
@@ -77,6 +78,7 @@ export default function PredictorPage() {
   const [catcherUseAverage, setCatcherUseAverage] = useState(false)
 
   const mutation = useMutation({ mutationFn: predictStealDecision })
+  const isPredictSlow = useSlowRequestHint(mutation.isPending)
 
   function handleSituationChange(patch: Partial<Situation>) {
     setSituation((prev) => ({ ...prev, ...patch }))
@@ -223,6 +225,13 @@ export default function PredictorPage() {
           <Button size="lg" onClick={handleSubmit} disabled={mutation.isPending}>
             {mutation.isPending ? "Calculating..." : "Get recommendation"}
           </Button>
+
+          {mutation.isPending && isPredictSlow && (
+            <p className="text-sm text-muted-foreground">
+              Waking up the server. This can take up to 30 seconds the
+              first time.
+            </p>
+          )}
 
           {mutation.isError && (
             <p className="text-sm text-destructive">{(mutation.error as Error).message}</p>
