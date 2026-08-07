@@ -1,10 +1,10 @@
 import { useMutation } from "@tanstack/react-query"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { PlayerInput } from "@/components/PlayerInput"
 import { ResultCard } from "@/components/ResultCard"
 import { SituationForm } from "@/components/SituationForm"
-import { predictStealDecision } from "@/lib/api"
+import { predictStealDecision, warmBackend } from "@/lib/api"
 import { clampSituation } from "@/lib/manual-entry-defaults"
 import { useSlowRequestHint } from "@/hooks/useSlowRequestHint"
 import type {
@@ -79,6 +79,13 @@ export default function PredictorPage() {
 
   const mutation = useMutation({ mutationFn: predictStealDecision })
   const isPredictSlow = useSlowRequestHint(mutation.isPending)
+
+  // Ping the backend as soon as this page loads, well before the user's
+  // first real search or predict request, so a cold Render free-tier
+  // instance has a head start waking up.
+  useEffect(() => {
+    warmBackend()
+  }, [])
 
   function handleSituationChange(patch: Partial<Situation>) {
     setSituation((prev) => ({ ...prev, ...patch }))

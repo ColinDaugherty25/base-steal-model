@@ -11,6 +11,15 @@ import type {
 // instead -- left unset, requests stay relative (local dev default).
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? ""
 
+// Fire-and-forget ping to wake a cold Render free-tier backend as early
+// as possible, ideally before the user's first real search or predict
+// request. Failures are ignored -- this is a best-effort warmup, not a
+// request the app depends on; the real request will still work (just
+// slower) if this one fails or the backend is still cold.
+export function warmBackend(): void {
+  fetch(`${API_BASE}/api/health`).catch(() => {})
+}
+
 export async function searchPlayers(
   role: PlayerRole,
   q: string,
