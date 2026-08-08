@@ -45,7 +45,7 @@ export default function HomePage() {
           preset="fade"
           className="text-4xl font-semibold tracking-tight text-foreground sm:text-6xl"
         >
-          Should the runner go?
+          Should They Steal?
         </TextEffect>
         <p className="max-w-xl text-base text-muted-foreground sm:text-lg">
           A success-probability model and break-even decision layer, trained

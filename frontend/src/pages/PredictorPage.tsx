@@ -158,7 +158,7 @@ export default function PredictorPage() {
   return (
     <div className="mx-auto max-w-6xl p-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-semibold text-foreground">Should they steal?</h1>
+        <h1 className="text-2xl font-semibold text-foreground">Should They Steal?</h1>
         <p className="text-sm text-muted-foreground">
           Set the game situation and pick the players. A model and decision
           layer trained on 2023-2025 MLB play-by-play handle the rest.
