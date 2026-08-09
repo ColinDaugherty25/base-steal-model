@@ -354,7 +354,7 @@ export default function PredictorPage() {
                   </>
                 ) : (
                   <>
-                    <Link2 /> Copy link to this result
+                    <Link2 /> Share result
                   </>
                 )}
               </Button>
