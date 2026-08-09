@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { NavLink } from "react-router"
 import { Button } from "@/components/ui/button"
 import { TextEffect } from "@/components/ui/text-effect"
@@ -7,6 +8,7 @@ import { InView } from "@/components/ui/in-view"
 import { SlidingNumber } from "@/components/ui/sliding-number"
 import { DiamondField } from "@/components/graphics/DiamondField"
 import { BACKTEST_LAYERS } from "@/lib/backtest-data"
+import { warmBackend } from "@/lib/api"
 
 const EXAMPLE_SITUATIONS = [
   "Runner on 1st, 2 outs, down 1, top 9th",
@@ -35,6 +37,17 @@ const HOW_IT_WORKS = [
 const previewStat = BACKTEST_LAYERS[0]
 
 export default function HomePage() {
+  // Same head start as PredictorPage's warmup ping, fired even earlier --
+  // people typically spend longer reading Home than filling out the
+  // Situation form, so this often fully covers a cold Render instance's
+  // wake-up before they ever reach Predictor. Direct links to /predictor
+  // (nav "Try it", bookmarks, shared links) never render Home, so that
+  // page's own prefetch stays in place too -- this is additive, not a
+  // replacement.
+  useEffect(() => {
+    warmBackend()
+  }, [])
+
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-20 px-6 py-16">
       <section className="flex flex-col gap-6">
