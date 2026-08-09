@@ -6,7 +6,7 @@ import { ResultCard } from "@/components/ResultCard"
 import { SituationForm } from "@/components/SituationForm"
 import { predictStealDecision, warmBackend } from "@/lib/api"
 import { clampSituation } from "@/lib/manual-entry-defaults"
-import { loadManualProfile, pickRoleFields, saveManualProfile } from "@/lib/manual-player-storage"
+import { clearManualProfile, loadManualProfile, pickRoleFields, saveManualProfile } from "@/lib/manual-player-storage"
 import { useSlowRequestHint } from "@/hooks/useSlowRequestHint"
 import type {
   CatcherStats,
@@ -179,6 +179,27 @@ export default function PredictorPage() {
     })
   }
 
+  // Clears both the visible form and the saved profile, so a stale
+  // remembered value doesn't just reappear the next time this role
+  // switches into Manual mode.
+  function handleRunnerReset() {
+    setRunnerUseAverage(false)
+    clearManualProfile("runner")
+    setSituation((prev) => ({ ...prev, ...RUNNER_MANUAL_DEFAULTS }))
+  }
+
+  function handlePitcherReset() {
+    setPitcherUseAverage(false)
+    clearManualProfile("pitcher")
+    setSituation((prev) => ({ ...prev, ...PITCHER_MANUAL_DEFAULTS }))
+  }
+
+  function handleCatcherReset() {
+    setCatcherUseAverage(false)
+    clearManualProfile("catcher")
+    setSituation((prev) => ({ ...prev, ...CATCHER_MANUAL_DEFAULTS }))
+  }
+
   function handleSubmit() {
     mutation.mutate(clampSituation(situation))
   }
@@ -220,6 +241,7 @@ export default function PredictorPage() {
                   onSelect={handleRunnerSelect}
                   situation={situation}
                   onManualChange={handleRunnerManualChange}
+                  onReset={handleRunnerReset}
                   useAverage={runnerUseAverage}
                   onUseAverageChange={setRunnerUseAverage}
                 />
@@ -235,6 +257,7 @@ export default function PredictorPage() {
                   onSelect={handlePitcherSelect}
                   situation={situation}
                   onManualChange={handlePitcherManualChange}
+                  onReset={handlePitcherReset}
                   useAverage={pitcherUseAverage}
                   onUseAverageChange={setPitcherUseAverage}
                 />
@@ -250,6 +273,7 @@ export default function PredictorPage() {
                   onSelect={handleCatcherSelect}
                   situation={situation}
                   onManualChange={handleCatcherManualChange}
+                  onReset={handleCatcherReset}
                   useAverage={catcherUseAverage}
                   onUseAverageChange={setCatcherUseAverage}
                 />

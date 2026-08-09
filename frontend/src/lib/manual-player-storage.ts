@@ -43,3 +43,11 @@ export function saveManualProfile(role: PlayerRole, profile: Partial<Situation>)
     // best-effort, ignore
   }
 }
+
+export function clearManualProfile(role: PlayerRole): void {
+  try {
+    localStorage.removeItem(storageKey(role))
+  } catch {
+    // best-effort, ignore
+  }
+}

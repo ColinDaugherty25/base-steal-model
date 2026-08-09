@@ -16,6 +16,7 @@ interface PlayerInputProps {
   onSelect: (player: PlayerSearchResult) => void
   situation: Situation
   onManualChange: (patch: Partial<Situation>) => void
+  onReset: () => void
   useAverage: boolean
   onUseAverageChange: (checked: boolean) => void
 }
@@ -33,6 +34,7 @@ export function PlayerInput({
   onSelect,
   situation,
   onManualChange,
+  onReset,
   useAverage,
   onUseAverageChange,
 }: PlayerInputProps) {
@@ -51,6 +53,7 @@ export function PlayerInput({
           role={role}
           situation={situation}
           onChange={onManualChange}
+          onReset={onReset}
           useAverage={useAverage}
           onUseAverageChange={onUseAverageChange}
         />

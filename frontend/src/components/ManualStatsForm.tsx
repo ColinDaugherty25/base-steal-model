@@ -9,6 +9,7 @@ import {
   type ClampField,
 } from "@/lib/manual-entry-defaults"
 
+import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -17,6 +18,7 @@ interface ManualStatsFormProps {
   role: PlayerRole
   situation: Situation
   onChange: (patch: Partial<Situation>) => void
+  onReset: () => void
   useAverage: boolean
   onUseAverageChange: (checked: boolean) => void
 }
@@ -87,9 +89,21 @@ export function ManualStatsForm({
   role,
   situation,
   onChange,
+  onReset,
   useAverage,
   onUseAverageChange,
 }: ManualStatsFormProps) {
+  // Bumped on every reset so the field grid below remounts cleanly --
+  // each ClampedNumberField owns its own draft text state, which
+  // otherwise wouldn't notice the situation prop resetting out from
+  // under it.
+  const [resetKey, setResetKey] = useState(0)
+
+  function handleReset() {
+    setResetKey((k) => k + 1)
+    onReset()
+  }
+
   function handleUseAverageChange(checked: boolean) {
     onUseAverageChange(checked)
     if (!checked) return
@@ -113,13 +127,18 @@ export function ManualStatsForm({
 
   return (
     <div className="flex flex-col gap-4">
-      <label className="flex items-center gap-2 text-sm">
-        <Checkbox checked={useAverage} onCheckedChange={(c: boolean | "indeterminate") => handleUseAverageChange(c === true)} />
-        Use average values for stats I don't know
-      </label>
+      <div className="flex items-center justify-between gap-2">
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox checked={useAverage} onCheckedChange={(c: boolean | "indeterminate") => handleUseAverageChange(c === true)} />
+          Use average values for stats I don't know
+        </label>
+        <Button type="button" variant="ghost" size="xs" onClick={handleReset}>
+          Reset
+        </Button>
+      </div>
 
       {role === "runner" && (
-        <div className="grid grid-cols-2 gap-4">
+        <div key={resetKey} className="grid grid-cols-2 gap-4">
           <label className="col-span-2 flex items-center gap-2 text-sm">
             <Checkbox
               checked={situation.runner_bats_lhb}
@@ -169,7 +188,7 @@ export function ManualStatsForm({
       )}
 
       {role === "pitcher" && (
-        <div className="grid grid-cols-2 gap-4">
+        <div key={resetKey} className="grid grid-cols-2 gap-4">
           <label className="col-span-2 flex items-center gap-2 text-sm">
             <Checkbox
               checked={situation.pitcher_throws_lhp}
@@ -191,7 +210,7 @@ export function ManualStatsForm({
       )}
 
       {role === "catcher" && (
-        <div className="grid grid-cols-2 gap-4">
+        <div key={resetKey} className="grid grid-cols-2 gap-4">
           <ClampedNumberField
             id="catcher_prior_cs_rate"
             label="Prior caught-stealing rate (%)"
