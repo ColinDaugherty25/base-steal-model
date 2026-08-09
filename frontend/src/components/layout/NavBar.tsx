@@ -1,7 +1,10 @@
+import { useState } from 'react';
 import { NavLink, useLocation } from 'react-router';
+import { Menu } from 'lucide-react';
 import { AnimatedBackground } from '@/components/ui/animated-background';
 import { DiamondMark } from '@/components/graphics/DiamondMark';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
@@ -11,8 +14,13 @@ const NAV_ITEMS = [
   { to: '/about', label: 'About' },
 ];
 
+function isNavItemActive(pathname: string, to: string): boolean {
+  return to === '/' ? pathname === '/' : pathname.startsWith(to);
+}
+
 export function NavBar() {
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <header className="border-b border-border bg-background">
@@ -32,10 +40,7 @@ export function NavBar() {
             transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
           >
             {NAV_ITEMS.map((item) => {
-              const isActive =
-                item.to === '/'
-                  ? location.pathname === '/'
-                  : location.pathname.startsWith(item.to);
+              const isActive = isNavItemActive(location.pathname, item.to);
               return (
                 <NavLink
                   key={item.to}
@@ -55,6 +60,40 @@ export function NavBar() {
             })}
           </AnimatedBackground>
         </nav>
+
+        <Popover open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon-sm" className="md:hidden" aria-label="Menu">
+              <Menu />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            align="end"
+            className="w-48 rounded-sm border border-border bg-popover p-1 shadow-none ring-0"
+          >
+            <nav className="flex flex-col">
+              {NAV_ITEMS.map((item) => {
+                const isActive = isNavItemActive(location.pathname, item.to);
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.to === '/'}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={cn(
+                      'rounded-sm px-3 py-2 text-sm font-medium transition-colors',
+                      isActive
+                        ? 'bg-secondary text-foreground'
+                        : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                    )}
+                  >
+                    {item.label}
+                  </NavLink>
+                );
+              })}
+            </nav>
+          </PopoverContent>
+        </Popover>
 
         <Button
           asChild
