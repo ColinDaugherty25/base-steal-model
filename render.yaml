@@ -8,5 +8,5 @@ services:
     healthCheckPath: /api/health
     envVars:
       - key: CORS_ORIGIN
-        value: https://frontend-swart-ten-58.vercel.app
+        value: https://stealdecisionmodel.com
     plan: free
