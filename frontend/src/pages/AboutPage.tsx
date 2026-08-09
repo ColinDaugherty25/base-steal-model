@@ -100,6 +100,27 @@ export default function AboutPage() {
           to that number.
         </p>
       </section>
+
+      <section className="border-t-2 border-border pt-6">
+        <h2 className="mb-2 text-lg font-semibold text-foreground">
+          Data &amp; attribution
+        </h2>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          The information used here was obtained free of charge from and is
+          copyrighted by Retrosheet. Interested parties may contact
+          Retrosheet at{" "}
+          <a
+            href="https://www.retrosheet.org"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-foreground"
+          >
+            www.retrosheet.org
+          </a>
+          . Player tracking data (sprint speed, pop time) is sourced from
+          MLB Statcast.
+        </p>
+      </section>
     </div>
   )
 }

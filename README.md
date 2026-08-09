@@ -139,6 +139,9 @@ situation and the steal outcomes. Statcast (`src/statcast_pull.py`) adds the
 tracking skills that matter most — runner sprint speed, catcher pop time — and
 is the biggest lever for improving the eventual model. See `ROADMAP.md`.
 
+The information used here was obtained free of charge from and is copyrighted
+by Retrosheet. Interested parties may contact Retrosheet at www.retrosheet.org.
+
 ## Validation
 
 Checked in `notebooks/eda.ipynb` against known facts (all pass):
