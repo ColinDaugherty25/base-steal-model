@@ -25,12 +25,48 @@ export function NavBar() {
   return (
     <header className="border-b border-border bg-background">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-        <NavLink to="/" className="flex items-center gap-2 shrink-0">
-          <DiamondMark className="h-7 w-7" />
-          <span className="text-sm font-semibold tracking-tight text-foreground">
-            Steal Decision Model
-          </span>
-        </NavLink>
+        <div className="flex items-center gap-2">
+          <Popover open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon-sm" className="md:hidden" aria-label="Menu">
+                <Menu />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent
+              align="start"
+              className="w-48 rounded-sm border border-border bg-popover p-1 shadow-none ring-0"
+            >
+              <nav className="flex flex-col">
+                {NAV_ITEMS.map((item) => {
+                  const isActive = isNavItemActive(location.pathname, item.to);
+                  return (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={item.to === '/'}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        'rounded-sm px-3 py-2 text-sm font-medium transition-colors',
+                        isActive
+                          ? 'bg-secondary text-foreground'
+                          : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      )}
+                    >
+                      {item.label}
+                    </NavLink>
+                  );
+                })}
+              </nav>
+            </PopoverContent>
+          </Popover>
+
+          <NavLink to="/" className="flex items-center gap-2 shrink-0">
+            <DiamondMark className="h-7 w-7" />
+            <span className="text-sm font-semibold tracking-tight text-foreground">
+              Steal Decision Model
+            </span>
+          </NavLink>
+        </div>
 
         <nav className="hidden md:block">
           <AnimatedBackground
@@ -60,40 +96,6 @@ export function NavBar() {
             })}
           </AnimatedBackground>
         </nav>
-
-        <Popover open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon-sm" className="md:hidden" aria-label="Menu">
-              <Menu />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent
-            align="end"
-            className="w-48 rounded-sm border border-border bg-popover p-1 shadow-none ring-0"
-          >
-            <nav className="flex flex-col">
-              {NAV_ITEMS.map((item) => {
-                const isActive = isNavItemActive(location.pathname, item.to);
-                return (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.to === '/'}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      'rounded-sm px-3 py-2 text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-secondary text-foreground'
-                        : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                    )}
-                  >
-                    {item.label}
-                  </NavLink>
-                );
-              })}
-            </nav>
-          </PopoverContent>
-        </Popover>
 
         <Button
           asChild
