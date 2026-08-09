@@ -6,6 +6,7 @@ import { ResultCard } from "@/components/ResultCard"
 import { SituationForm } from "@/components/SituationForm"
 import { predictStealDecision, warmBackend } from "@/lib/api"
 import { clampSituation } from "@/lib/manual-entry-defaults"
+import { loadManualProfile, pickRoleFields, saveManualProfile } from "@/lib/manual-player-storage"
 import { useSlowRequestHint } from "@/hooks/useSlowRequestHint"
 import type {
   CatcherStats,
@@ -129,7 +130,8 @@ export default function PredictorPage() {
     if (mode === "manual") {
       setRunner(null)
       setRunnerUseAverage(false)
-      setSituation((prev) => ({ ...prev, ...RUNNER_MANUAL_DEFAULTS }))
+      const saved = loadManualProfile("runner")
+      setSituation((prev) => ({ ...prev, ...RUNNER_MANUAL_DEFAULTS, ...saved }))
     }
   }
 
@@ -138,7 +140,8 @@ export default function PredictorPage() {
     if (mode === "manual") {
       setPitcher(null)
       setPitcherUseAverage(false)
-      setSituation((prev) => ({ ...prev, ...PITCHER_MANUAL_DEFAULTS }))
+      const saved = loadManualProfile("pitcher")
+      setSituation((prev) => ({ ...prev, ...PITCHER_MANUAL_DEFAULTS, ...saved }))
     }
   }
 
@@ -147,8 +150,33 @@ export default function PredictorPage() {
     if (mode === "manual") {
       setCatcher(null)
       setCatcherUseAverage(false)
-      setSituation((prev) => ({ ...prev, ...CATCHER_MANUAL_DEFAULTS }))
+      const saved = loadManualProfile("catcher")
+      setSituation((prev) => ({ ...prev, ...CATCHER_MANUAL_DEFAULTS, ...saved }))
     }
+  }
+
+  function handleRunnerManualChange(patch: Partial<Situation>) {
+    setSituation((prev) => {
+      const next = { ...prev, ...patch }
+      saveManualProfile("runner", pickRoleFields("runner", next))
+      return next
+    })
+  }
+
+  function handlePitcherManualChange(patch: Partial<Situation>) {
+    setSituation((prev) => {
+      const next = { ...prev, ...patch }
+      saveManualProfile("pitcher", pickRoleFields("pitcher", next))
+      return next
+    })
+  }
+
+  function handleCatcherManualChange(patch: Partial<Situation>) {
+    setSituation((prev) => {
+      const next = { ...prev, ...patch }
+      saveManualProfile("catcher", pickRoleFields("catcher", next))
+      return next
+    })
   }
 
   function handleSubmit() {
@@ -191,7 +219,7 @@ export default function PredictorPage() {
                   selected={runner}
                   onSelect={handleRunnerSelect}
                   situation={situation}
-                  onManualChange={handleSituationChange}
+                  onManualChange={handleRunnerManualChange}
                   useAverage={runnerUseAverage}
                   onUseAverageChange={setRunnerUseAverage}
                 />
@@ -206,7 +234,7 @@ export default function PredictorPage() {
                   selected={pitcher}
                   onSelect={handlePitcherSelect}
                   situation={situation}
-                  onManualChange={handleSituationChange}
+                  onManualChange={handlePitcherManualChange}
                   useAverage={pitcherUseAverage}
                   onUseAverageChange={setPitcherUseAverage}
                 />
@@ -221,7 +249,7 @@ export default function PredictorPage() {
                   selected={catcher}
                   onSelect={handleCatcherSelect}
                   situation={situation}
-                  onManualChange={handleSituationChange}
+                  onManualChange={handleCatcherManualChange}
                   useAverage={catcherUseAverage}
                   onUseAverageChange={setCatcherUseAverage}
                 />
