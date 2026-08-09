@@ -8,8 +8,8 @@ export function DiamondField({ className }: { className?: string }) {
       aria-hidden="true"
     >
       <rect
-        x="200"
-        y="70"
+        x="108"
+        y="108"
         width="184"
         height="184"
         rx="6"

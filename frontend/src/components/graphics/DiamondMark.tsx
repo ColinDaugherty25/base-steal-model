@@ -8,8 +8,8 @@ export function DiamondMark({ className }: { className?: string }) {
       aria-hidden="true"
     >
       <rect
-        x="16"
-        y="3"
+        x="6.8"
+        y="6.8"
         width="18.4"
         height="18.4"
         rx="3"
@@ -17,8 +17,8 @@ export function DiamondMark({ className }: { className?: string }) {
         className="fill-brand-navy"
       />
       <rect
-        x="16"
-        y="9"
+        x="11.25"
+        y="11.25"
         width="9.5"
         height="9.5"
         rx="1.5"
