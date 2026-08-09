@@ -1,5 +1,7 @@
 import { useMutation } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
+import { useSearchParams } from "react-router"
+import { Check, Link2 } from "lucide-react"
 
 import { PlayerInput } from "@/components/PlayerInput"
 import { ResultCard } from "@/components/ResultCard"
@@ -7,6 +9,7 @@ import { SituationForm } from "@/components/SituationForm"
 import { predictStealDecision, warmBackend } from "@/lib/api"
 import { clampSituation } from "@/lib/manual-entry-defaults"
 import { clearManualProfile, loadManualProfile, pickRoleFields, saveManualProfile } from "@/lib/manual-player-storage"
+import { decodeSituation, encodeSituation } from "@/lib/share-link"
 import { useSlowRequestHint } from "@/hooks/useSlowRequestHint"
 import type {
   CatcherStats,
@@ -78,6 +81,9 @@ export default function PredictorPage() {
   const [pitcherUseAverage, setPitcherUseAverage] = useState(false)
   const [catcherUseAverage, setCatcherUseAverage] = useState(false)
 
+  const [searchParams] = useSearchParams()
+  const [copied, setCopied] = useState(false)
+
   const mutation = useMutation({ mutationFn: predictStealDecision })
   const isPredictSlow = useSlowRequestHint(mutation.isPending)
 
@@ -87,6 +93,46 @@ export default function PredictorPage() {
   useEffect(() => {
     warmBackend()
   }, [])
+
+  // A shared link (?s=<encoded situation>) reproduces the exact
+  // prediction it was generated from. All 3 roles go into Manual mode
+  // with the shared stats visible, since a shared link has no named
+  // player identity to show, just the numbers that produced the
+  // result -- that's exactly what Manual mode already displays. Runs
+  // once on mount only; the Share button below builds its link from
+  // whatever's currently in the form, not this loaded value, so this
+  // effect must not re-fire as the user edits afterward.
+  useEffect(() => {
+    const encoded = searchParams.get("s")
+    if (!encoded) return
+    const decoded = decodeSituation(encoded)
+    if (!decoded) return
+
+    setSituation(decoded)
+    setRunnerMode("manual")
+    setPitcherMode("manual")
+    setCatcherMode("manual")
+    setRunnerUseAverage(false)
+    setPitcherUseAverage(false)
+    setCatcherUseAverage(false)
+    mutation.mutate(clampSituation(decoded))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function handleShare() {
+    const encoded = encodeSituation(situation)
+    const url = `${window.location.origin}${window.location.pathname}?s=${encoded}`
+    navigator.clipboard
+      .writeText(url)
+      .then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      })
+      .catch(() => {
+        // best-effort -- clipboard access can fail (permissions,
+        // insecure context); nothing to recover to, just no-op
+      })
+  }
 
   function handleSituationChange(patch: Partial<Situation>) {
     setSituation((prev) => ({ ...prev, ...patch }))
@@ -299,7 +345,20 @@ export default function PredictorPage() {
 
         <div className="lg:sticky lg:top-6">
           {mutation.isSuccess ? (
-            <ResultCard result={mutation.data} />
+            <div className="flex flex-col gap-3">
+              <ResultCard result={mutation.data} />
+              <Button variant="outline" size="sm" onClick={handleShare} className="self-start">
+                {copied ? (
+                  <>
+                    <Check /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Link2 /> Copy link to this result
+                  </>
+                )}
+              </Button>
+            </div>
           ) : (
             <div className="flex min-h-48 flex-col items-center justify-center rounded-none border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
               Fill in the situation and players, then get a recommendation.
