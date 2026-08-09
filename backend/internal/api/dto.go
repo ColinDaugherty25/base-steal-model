@@ -52,7 +52,14 @@ func (r predictRequest) toSituation() decision.Situation {
 var validTargets = map[string]bool{"2": true, "3": true, "H": true}
 
 // validate returns a non-empty error message if the request is malformed.
+// Bounds on the numeric fields mirror the frontend's CLAMP_RANGES
+// (manual-entry-defaults.ts) -- that file clamps client-side for UX, this
+// rejects outright as the actual API boundary, since the frontend is not
+// a trusted input source.
 func (r predictRequest) validate() string {
+	if r.Inning < 1 || r.Inning > 20 {
+		return "inning must be between 1 and 20"
+	}
 	if r.Half != 0 && r.Half != 1 {
 		return "half must be 0 or 1"
 	}
@@ -64,6 +71,36 @@ func (r predictRequest) validate() string {
 	}
 	if !isValidBaseCode(r.BaseCode) {
 		return "base_code must be one of " + strings.Join(decision.BaseStates, ", ")
+	}
+	if r.ScoreDiff < -30 || r.ScoreDiff > 30 {
+		return "score_diff must be between -30 and 30"
+	}
+	if r.Balls < 0 || r.Balls > 3 {
+		return "balls must be between 0 and 3"
+	}
+	if r.Strikes < 0 || r.Strikes > 2 {
+		return "strikes must be between 0 and 2"
+	}
+	if r.RunnerPriorSR < 0 || r.RunnerPriorSR > 1 {
+		return "runner_prior_sr must be between 0 and 1"
+	}
+	if r.RunnerPriorAtt < 0 || r.RunnerPriorAtt > 100 {
+		return "runner_prior_att must be between 0 and 100"
+	}
+	if r.PitcherPriorSRAllowed < 0 || r.PitcherPriorSRAllowed > 1 {
+		return "pitcher_prior_sr_allowed must be between 0 and 1"
+	}
+	if r.CatcherPriorCSRate < 0 || r.CatcherPriorCSRate > 1 {
+		return "catcher_prior_cs_rate must be between 0 and 1"
+	}
+	if r.RunnerSprintSpeed != nil && (*r.RunnerSprintSpeed < 20 || *r.RunnerSprintSpeed > 32) {
+		return "runner_sprint_speed must be between 20 and 32"
+	}
+	if r.RunnerAge != nil && (*r.RunnerAge < 16 || *r.RunnerAge > 50) {
+		return "runner_age must be between 16 and 50"
+	}
+	if r.CatcherPopTime != nil && (*r.CatcherPopTime < 1.7 || *r.CatcherPopTime > 2.3) {
+		return "catcher_pop_time must be between 1.7 and 2.3"
 	}
 	return ""
 }
