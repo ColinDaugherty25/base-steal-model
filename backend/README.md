@@ -8,7 +8,9 @@ app" section for the full picture.
 
 ## Prerequisites
 
-- Go 1.23+ (developed against 1.26)
+- Go 1.26.5 (pinned in `go.mod`'s `toolchain` line — fixes
+  `GO-2026-5856`, a `crypto/tls` ECH privacy leak; `go run`/`go test`
+  auto-fetch this toolchain if your local Go is older)
 - `backend/data/app.db` — already committed, so this runs out of the box.
   Regenerate it after retraining the model or refreshing the Retrosheet
   data with (from the repo root):
@@ -55,6 +57,19 @@ curl -s -X POST localhost:8080/api/predict -H "Content-Type: application/json" -
 }'
 ```
 
+## Security & rate limiting
+
+Every route (`internal/api/router.go`) goes through: `middleware.Recoverer`
+(panic-safe), a `securityHeaders` middleware (`X-Content-Type-Options`,
+`Referrer-Policy` — narrower than the frontend's CSP since this is a
+pure JSON API with no HTML/framing surface), locked-down CORS
+(only `CORS_ORIGIN` is allowed), and `httprate.LimitByIP(120,
+time.Minute)` — generous enough for debounced-keystroke player search,
+but a real backstop against scripted abuse. `predictRequest.validate()`
+(`internal/api/dto.go`) bounds-checks every field of a predict request
+(inning, outs, counts, all player stats) before it reaches the decision
+layer.
+
 ## Project layout
 
 ```
@@ -63,7 +78,7 @@ backend/
   sql/queries/*.sql        # sqlc query annotations
   internal/db/              # sqlc-generated (DO NOT EDIT) -- regenerate with `sqlc generate`
   internal/decision/          # the ported decision layer -- pure Go, no DB/HTTP deps
-  internal/api/                 # chi handlers + request/response DTOs
+  internal/api/                 # chi handlers, request/response DTOs, error helpers, router + middleware
   internal/config/                # env var loading
   cmd/server/                       # wires it all together, starts the HTTP server
 ```
@@ -90,4 +105,3 @@ pass).
 If you change `sql/schema.sql` or add a query in `sql/queries/`, run:
 ```bash
 sqlc generate
-```
