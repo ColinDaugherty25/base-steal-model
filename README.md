@@ -1,5 +1,7 @@
 # Base-Steal Decision Model
 
+**Live site: [stealdecisionmodel.com](https://stealdecisionmodel.com)**
+
 Predict whether a base runner should attempt a steal in a given situation.
 
 Two connected pieces (see [`ROADMAP.md`](ROADMAP.md) for the full design):
@@ -562,5 +564,3 @@ details, and project layout.
 - No lead distance / jump data exists publicly — sprint speed is the proxy.
 - Pitcher tempo, pitch type/location, and pickoff-attempt rate aren't
   cleanly available from public Statcast leaderboards.
-- Late-inning decisions should eventually use win probability, not run
-  expectancy (see `ROADMAP.md`, "one important upgrade").
